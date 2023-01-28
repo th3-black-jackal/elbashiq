@@ -15,7 +15,7 @@
 #define MAXDATASIZE 100
 
 char ipstr[INET6_ADDRSTRLEN];
-char s[INET6_ADDSTRLEN];
+char s[INET6_ADDRSTRLEN];
 char msg[MAXDATASIZE];
 
 struct addrinfo hints;

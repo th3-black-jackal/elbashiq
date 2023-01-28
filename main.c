@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+/*
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -13,23 +14,30 @@
 
 #define PORT "1996"
 #define BACKLOG 10
+*/
 
-void sigchld_handler(int s){
+#include "el_bashiq_server.h"
+
+/*void sigchld_handler(int s){
 	//We will save the current errno as the waitpid() overrites it
 	int saved_errno = errno;
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 	errno = saved_errno;
-}
+}*/
 
-void *get_in_addr(struct sockaddr *sa){
+/*void *get_in_addr(struct sockaddr *sa){
 	if(sa->sa_family == AF_INET){
 		return &(((struct sockaddr_in*)sa)->sin_addr);
 	}
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
+}*/
 
 
 int main(){
+	searchList(NULL);
+	bindSocket();
+	startServer();
+	/*
 	int sockfd, new_fd;
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_storage their_addr;
@@ -94,7 +102,7 @@ int main(){
 			exit(0);
 		}
 		close(new_fd);
-	}
+	}*/
 	return 0;
 
 }
