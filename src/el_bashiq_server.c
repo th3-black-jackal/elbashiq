@@ -1,5 +1,15 @@
 #include "el_bashiq_server.h"
 
+/*char ipstr[INET6_ADDRSTRLEN];
+char s[INET6_ADDRSTRLEN];
+char msg[MAXDATASIZE];
+
+struct addrinfo hints;
+struct addrinfo *servinfo;
+int status;
+int *socket_desc, *new_fd;
+int desc, new_desc;
+*/
 
 void searchList(char *user_addr){
 	socket_desc = &desc;
@@ -51,12 +61,14 @@ void bindSocket(){
 		} 
 }
 
-void startServer(){	
+void startServer(char *user_addr){	
 	/*
 	 *
 	 * Start the server loop by using the initialized socket descriptor, use this function with the server module
 	 *
 	 */
+	int *new_fd = searchList(user_addr);
+	int *socket_desc = bindSocket();
 	printf("Start server...\n");	
 	struct sockaddr_storage their_addr;
 	socklen_t sin_size = sizeof their_addr;
