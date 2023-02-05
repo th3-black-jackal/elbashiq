@@ -12,6 +12,9 @@ int desc, new_desc;
 */
 
 void searchList(char *user_addr){
+	/*
+	 * Fill 
+	 */
 	socket_desc = &desc;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
