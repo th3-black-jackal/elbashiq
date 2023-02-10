@@ -1,6 +1,7 @@
 #include "el_bashiq_server.h"
 
-/*char ipstr[INET6_ADDRSTRLEN];
+/*
+char ipstr[INET6_ADDRSTRLEN];
 char s[INET6_ADDRSTRLEN];
 char msg[MAXDATASIZE];
 
@@ -11,22 +12,33 @@ int *socket_desc, *new_fd;
 int desc, new_desc;
 */
 
-void searchList(char *user_addr){
+
+
+
+struct addrinfo *searchList(char *user_addr){
 	/*
-	 * Fill 
+	 * 
+	 * Use this function to call getaddrinfo that intializes the structs for later use 
+	 *
 	 */
-	socket_desc = &desc;
+	struct addrinfo hints;
+	struct addrinfo *servinfo;
+	int status;
+	//Just to make sure that the hints struct is empty
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	void *addr;
-	char *ipver;
 	if(status = getaddrinfo(user_addr, PORT, &hints, &servinfo) != 0){
 		printf("Error in getting IP %d\n%s", status, gai_strerror(status));
 	}
-	new_fd = &new_desc;
+	struct addrinfo *result;
+	result = (struct addrinfo*)malloc(sizeof(struct addrinfo));
+	result = servinfo;
+	return result;
+	
 }
+
 
 void bindSocket(){
 	/*
@@ -34,6 +46,7 @@ void bindSocket(){
 	 * Binding a socket descriptor to a port to allow the kernel for listening on this port to match a socket descriptor, you can use this with the server module
 	 *
 	 */
+	/*
 	int yes = 1;
 	printf("Binding\n");
 	if(servinfo == NULL)
@@ -62,6 +75,7 @@ void bindSocket(){
 		if((listen(*socket_desc, BACKLOG)) == -1){
 				fprintf(stderr, "Can't listening\n");
 		} 
+		*/
 }
 
 void startServer(char *user_addr){	
@@ -70,6 +84,7 @@ void startServer(char *user_addr){
 	 * Start the server loop by using the initialized socket descriptor, use this function with the server module
 	 *
 	 */
+	/*
 	int *new_fd = searchList(user_addr);
 	int *socket_desc = bindSocket();
 	printf("Start server...\n");	
@@ -79,5 +94,6 @@ void startServer(char *user_addr){
 	if((*new_fd = accept(*socket_desc, (struct sockaddr *)&their_addr, &sin_size)) == -1){
 		perror("accept");
 		exit(1);
-	}
+	}*/
 }
+

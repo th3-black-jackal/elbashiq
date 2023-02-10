@@ -4,3 +4,4 @@ build
 *.swap
 *.swp
 *.out
+*.o

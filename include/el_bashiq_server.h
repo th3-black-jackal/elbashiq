@@ -14,16 +14,19 @@
 #define PORT "1996"
 #define MAXDATASIZE 100
 
+
+//typedef struct addrinfo (*addrinforesult)(addrinfo);
+
 char ipstr[INET6_ADDRSTRLEN];
 char s[INET6_ADDRSTRLEN];
 char msg[MAXDATASIZE];
 
-struct addrinfo hints;
-struct addrinfo *servinfo;
-int status;
-int *socket_desc, *new_fd;
-int desc, new_desc;
-void searchList(char *);
+//struct addrinfo hints;
+//struct addrinfo *servinfo;
+//int status;
+//int *socket_desc, *new_fd;
+//int desc, new_desc;
+extern "C" struct addrinfo *searchList(char *);
 void bindSocket();
 void startServer();
 void sendMsg(char *, int);
