@@ -26,7 +26,7 @@ char msg[MAXDATASIZE];
 //int status;
 //int *socket_desc, *new_fd;
 //int desc, new_desc;
-extern "C" struct addrinfo *searchList(char *);
+struct addrinfo *searchList(char *);
 void bindSocket();
 void startServer();
 void sendMsg(char *, int);

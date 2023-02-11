@@ -1,1 +1,1 @@
-ADD_LIBRARY(TestElBashiqServer test_el_bashiq_server.cpp)
+ADD_LIBRARY(TestElBashiqServer test_el_bashiq_server.c)

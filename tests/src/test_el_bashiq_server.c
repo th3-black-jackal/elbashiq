@@ -1,23 +1,28 @@
+#include <stdio.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <string>
-#include <iostream>
 #include "el_bashiq_server.h"
-#include "test_el_bashiq_server.hpp"
+#include "test_el_bashiq_server.h"
 
 void testSearchList(){
 	struct addrinfo *res, *p;
 	res = searchList(NULL);
 	for(p = res; p != NULL;p = p->ai_next){
 		void *addr;
-		std::string ipver;
+		char *ipver;
 		if(p->ai_family == AF_INET){
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
 			addr = &(ipv4->sin_addr);
 			ipver = "IPv4";
 		}
+		else
+		{
+			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+			addr = &(ipv6->sin6_addr);
+			ipver = "IPv6";
+		}
 		inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);	
-		std::cout<<"Found the following IPs"<<std::endl;
-		std::cout<<ipver<<": "<<ipstr<<std::endl;
+		printf(" %s: %s\n", ipver, ipstr);
 	}
 }
