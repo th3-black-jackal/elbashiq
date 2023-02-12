@@ -88,11 +88,14 @@ void bindSocket(int socket_desc, struct addrinfo *servinfo){
 			printf("Connected to %s\n", servinfo->ai_addr);
 		}
 	}
-	/*
-	if((listen(*socket_desc, BACKLOG)) == -1){
+}
+
+void startListening(int socket_desc, int backlog){
+	int *socket_desc_p;
+	socket_desc_p = &socket_desc;
+	if((listen(*socket_desc_p, backlog)) == -1){
 		fprintf(stderr, "Can't listening\n");
-	} */
-		
+	}
 }
 
 void startServer(char *user_addr){	

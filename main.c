@@ -5,6 +5,7 @@ void runTests(){
 	testSearchList();
 	testGetSocketDescriptorLocalDevice();
 	testBindSocketLocalDevice();
+	testStartListeningLocalDevice();
 }
 
 
