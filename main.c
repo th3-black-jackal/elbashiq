@@ -4,6 +4,7 @@
 void runTests(){
 	testSearchList();
 	testGetSocketDescriptorLocalDevice();
+	testBindSocketLocalDevice();
 }
 
 

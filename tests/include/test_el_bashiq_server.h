@@ -3,5 +3,5 @@
 
 void testSearchList();
 void testGetSocketDescriptorLocalDevice();
-
+void testBindSocketLocalDevice();
 #endif

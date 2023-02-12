@@ -58,42 +58,41 @@ int getSocketDescriptor(struct addrinfo *servinfo){
 	return socket_desc;
 }
 
-void bindSocket(struct addrinfo *servinfo){
+void bindSocket(int socket_desc, struct addrinfo *servinfo){
 	/*
 	 * 
 	 * Binding a socket descriptor to a port to allow the kernel for listening on this port to match a socket descriptor, you can use this with the server module
 	 *
 	 */
-	/*	
+		
 	int yes = 1;
 	printf("Binding\n");
 	if(servinfo == NULL)
-		printf("Something wrong\n");
-	printf("Creating socket\n");
-	if((*socket_desc = socket(servinfo -> ai_family, servinfo -> ai_socktype, servinfo -> ai_protocol)) == 
-				-1 ){	
-		perror("Can't creat socket\n");
+		printf("Can't bind to a null address information\n");
+
+	printf("Start socket binding\n");
+	int *socket_desc_p = &socket_desc;
+	if(setsockopt(*socket_desc_p, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
+		perror("Address already in use\n");	
 		exit(1);
-	}	
-	else{
-		if(setsockopt(*socket_desc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
-		       perror("setsockopt");	
-		       exit(1);
-		}else {
-			printf("socket_desc: %d\n", *socket_desc);
-			if((bind(*socket_desc, servinfo -> ai_addr, servinfo -> ai_addrlen)) == -1){
-				perror("bind");
-			}else{
-			printf("%d\n", *socket_desc);
-			printf("Connected to %s\n", ipstr);
-			printf("%d\n", *socket_desc);
-				}
-			}
-		}	
-		if((listen(*socket_desc, BACKLOG)) == -1){
-				fprintf(stderr, "Can't listening\n");
-		} 
-		*/
+	}
+	else {
+		socket_desc = *socket_desc_p;
+		printf("socket_desc: %d\n", socket_desc);
+		if((bind(socket_desc, servinfo -> ai_addr, servinfo -> ai_addrlen)) == -1){
+			fprintf(stderr, "Couldn't bind to the required socket descriptor: %d\n", socket_desc);
+		}
+		else
+		{
+			//Need a function to prinf the addrinfo content
+			printf("Connected to %s\n", servinfo->ai_addr);
+		}
+	}
+	/*
+	if((listen(*socket_desc, BACKLOG)) == -1){
+		fprintf(stderr, "Can't listening\n");
+	} */
+		
 }
 
 void startServer(char *user_addr){	

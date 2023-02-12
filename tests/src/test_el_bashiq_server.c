@@ -36,3 +36,12 @@ void testGetSocketDescriptorLocalDevice(){
 	printf("%d\n", socket_desc);
 
 }
+
+
+void testBindSocketLocalDevice(){
+	struct addrinfo *res;
+	res = searchList(NULL);
+	int socket_desc;
+	socket_desc = getSocketDescriptor(res);
+	bindSocket(socket_desc, res);
+}
