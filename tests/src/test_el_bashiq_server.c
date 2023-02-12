@@ -30,9 +30,9 @@ void testSearchList(){
 void testGetSocketDescriptorLocalDevice(){
 	struct addrinfo *res;
 	res = searchList(NULL);
-	int *socket_desc;
+	int socket_desc;
 	socket_desc = getSocketDescriptor(res);
 	printf("New socket descriptor\n");
-	printf("%d\n", *socket_desc);
+	printf("%d\n", socket_desc);
 
 }

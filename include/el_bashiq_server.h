@@ -27,7 +27,7 @@ char msg[MAXDATASIZE];
 //int *socket_desc, *new_fd;
 //int desc, new_desc;
 struct addrinfo *searchList(char *);
-int *getSocketDescriptor(struct addrinfo *);
+int getSocketDescriptor(struct addrinfo *);
 void bindSocket();
 void startServer();
 void sendMsg(char *, int);
