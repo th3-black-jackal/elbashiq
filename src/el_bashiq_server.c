@@ -40,13 +40,31 @@ struct addrinfo *searchList(char *user_addr){
 }
 
 
-void bindSocket(){
+int *getSocketDescriptor(struct addrinfo *servinfo){
+	/*
+	 * Get a new file descriptor for the required addrinfo
+	 */
+	int *socket_desc;
+	if(!servinfo){
+		perror("Empty addrinfo\n");
+		exit(1);
+	}
+	printf("Getting socket descriptor\n");
+	
+	if((*socket_desc = socket(servinfo -> ai_family, servinfo->ai_socktype, servinfo -> ai_protocol)) == -1){
+	 perror("Couldn't create socket descriptor\n");
+	 exit(1);
+	}
+	return socket_desc;
+}
+
+void bindSocket(struct addrinfo *servinfo){
 	/*
 	 * 
 	 * Binding a socket descriptor to a port to allow the kernel for listening on this port to match a socket descriptor, you can use this with the server module
 	 *
 	 */
-	/*
+	/*	
 	int yes = 1;
 	printf("Binding\n");
 	if(servinfo == NULL)

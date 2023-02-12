@@ -1,7 +1,14 @@
 #include "test_el_bashiq_server.h"
 
-int main(){
+
+void runTests(){
 	testSearchList();
+	testGetSocketDescriptorLocalDevice();
+}
+
+
+int main(){
+	runTests();
 	return 0;
 }
 

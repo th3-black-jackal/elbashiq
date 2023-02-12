@@ -26,3 +26,13 @@ void testSearchList(){
 		printf(" %s: %s\n", ipver, ipstr);
 	}
 }
+
+void testGetSocketDescriptorLocalDevice(){
+	struct addrinfo *res;
+	res = searchList(NULL);
+	int *socket_desc;
+	socket_desc = getSocketDescriptor(res);
+	printf("New socket descriptor\n");
+	printf("%d\n", *socket_desc);
+
+}
