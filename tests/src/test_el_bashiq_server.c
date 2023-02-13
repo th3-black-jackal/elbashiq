@@ -54,3 +54,14 @@ void testStartListeningLocalDevice(){
 	bindSocket(socket_desc, res);
 	startListening(socket_desc, 10);
 }
+
+
+void testStartServerLocalDevice(){
+	struct addrinfo *res;
+	res = searchList(NULL);
+	int socket_desc;
+	socket_desc = getSocketDescriptor(res);
+	bindSocket(socket_desc, res);
+	startListening(socket_desc, 10);
+	startServer(&res, socket_desc);
+}

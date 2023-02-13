@@ -5,5 +5,5 @@ void testSearchList();
 void testGetSocketDescriptorLocalDevice();
 void testBindSocketLocalDevice();
 void testStartListeningLocalDevice();
-
+void testStartServerLocalDevice();
 #endif

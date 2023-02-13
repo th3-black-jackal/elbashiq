@@ -98,22 +98,27 @@ void startListening(int socket_desc, int backlog){
 	}
 }
 
-void startServer(char *user_addr){	
+void startServer(struct sockaddr *servinfo, int socket_desc){	
 	/*
 	 *
 	 * Start the server loop by using the initialized socket descriptor, use this function with the server module
 	 *
 	 */
-	/*
-	int *new_fd = searchList(user_addr);
-	int *socket_desc = bindSocket();
-	printf("Start server...\n");	
-	struct sockaddr_storage their_addr;
-	socklen_t sin_size = sizeof their_addr;
-	printf("origional socket descriptor: %d\n", *socket_desc);
-	if((*new_fd = accept(*socket_desc, (struct sockaddr *)&their_addr, &sin_size)) == -1){
-		perror("accept");
-		exit(1);
-	}*/
+	int new_fd;
+	char s[INET6_ADDRSTRLEN];
+	printf("Starting server...\n");	
+	while(1){
+		socklen_t sin_size = sizeof servinfo;
+		if((new_fd = accept(socket_desc, (struct sockaddr *)&servinfo, &sin_size)) == -1){
+			perror("accept");
+			exit(1);
+		}
+		else
+		{
+			printf("Connection success\n");
+		}
+	}
+	//inet_ntop(servinfo->sa_family, get_in_addr((struct sockaddr *) &servinfo, s, sizeof s)); 
+	//printf("Server got connection from %s\n", s);
 }
 

@@ -30,7 +30,7 @@ struct addrinfo *searchList(char *);
 int getSocketDescriptor(struct addrinfo *);
 void bindSocket(int socket_desc, struct addrinfo *servinfo); 
 void startListening(int socket_desc, int backlog);
-void startServer();
+void startServer(struct sockaddr *servinfo, int socket_desc);
 void sendMsg(char *, int);
 void sendFile(unsigned int, const char *, int);
 void recvMsg(int);
