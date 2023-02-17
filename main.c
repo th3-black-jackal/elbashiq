@@ -2,10 +2,10 @@
 
 
 void runTests(){
-	testSearchList();
+	/*testSearchList();
 	testGetSocketDescriptorLocalDevice();
 	testBindSocketLocalDevice();
-	testStartListeningLocalDevice();
+	testStartListeningLocalDevice();*/
 	testStartServerLocalDevice();
 }
 

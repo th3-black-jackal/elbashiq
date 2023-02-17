@@ -15,17 +15,12 @@
 #define MAXDATASIZE 100
 
 
-//typedef struct addrinfo (*addrinforesult)(addrinfo);
 
-char ipstr[INET6_ADDRSTRLEN];
-char s[INET6_ADDRSTRLEN];
+
+char ipstr[INET_ADDRSTRLEN];
+
 char msg[MAXDATASIZE];
 
-//struct addrinfo hints;
-//struct addrinfo *servinfo;
-//int status;
-//int *socket_desc, *new_fd;
-//int desc, new_desc;
 struct addrinfo *searchList(char *);
 int getSocketDescriptor(struct addrinfo *);
 void bindSocket(int socket_desc, struct addrinfo *servinfo); 

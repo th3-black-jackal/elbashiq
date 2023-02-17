@@ -1,5 +1,6 @@
 #include "el_bashiq_server.h"
-
+#include "netdb.h"
+#include <arpa/inet.h>
 /*
 char ipstr[INET6_ADDRSTRLEN];
 char s[INET6_ADDRSTRLEN];
@@ -98,6 +99,20 @@ void startListening(int socket_desc, int backlog){
 	}
 }
 
+
+void sigchld_handler(int s){
+	int saved_errno = errno;
+	while(waitpid(-1, NULL, WNOHANG) > 0);
+	errno = saved_errno;
+}
+
+void *get_in_addr(struct sockaddr *sa){
+	if(sa->sa_family == AF_INET){
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
 void startServer(struct sockaddr *servinfo, int socket_desc){	
 	/*
 	 *
@@ -105,18 +120,20 @@ void startServer(struct sockaddr *servinfo, int socket_desc){
 	 *
 	 */
 	int new_fd;
-	char s[INET6_ADDRSTRLEN];
+	char s[INET_ADDRSTRLEN];
 	printf("Starting server...\n");	
+	struct sockaddr_storage their_addr;
 	while(1){
 		socklen_t sin_size = sizeof servinfo;
-		if((new_fd = accept(socket_desc, (struct sockaddr *)&servinfo, &sin_size)) == -1){
+		if((new_fd = accept(socket_desc, (struct sockaddr *)&their_addr, &sin_size)) == -1){
 			perror("accept");
 			exit(1);
 		}
-		else
-		{
-			printf("Connection success\n");
-		}
+		void *test_get_in_addr = &(((struct sockaddr_in*)servinfo)->sin_addr);
+		unsigned short address_family = AF_INET;
+		inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+		printf("Server: Got connection from %s\n", s);
+		close(new_fd);
 	}
 	//inet_ntop(servinfo->sa_family, get_in_addr((struct sockaddr *) &servinfo, s, sizeof s)); 
 	//printf("Server got connection from %s\n", s);
