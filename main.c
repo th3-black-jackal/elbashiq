@@ -8,7 +8,7 @@ void runTests(){
 	testStartListeningLocalDevice();
 	testStartServerLocalDevice();*/
 	//testConnectToServer();
-	testFillServInfo();
+	testFillServInfoLocalDevice();
 }
 
 

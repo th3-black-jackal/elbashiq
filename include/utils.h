@@ -11,6 +11,10 @@
 #include "errno.h"
 
 
+
+#define PORT "1996"
+
+
 struct addrinfo *fillServInfo(char *user_addr);
 int getSocketDescriptor(struct addrinfo *servinfo);
 
