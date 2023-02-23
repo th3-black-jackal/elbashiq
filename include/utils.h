@@ -1,5 +1,5 @@
-#ifndef el_bashiq_client
-#define el_bashiq_client
+#ifndef utils
+#define utils
 
 #include "stdlib.h"
 #include "stdio.h"
