@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/tests/include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests/src)
-SET (EXTRA_LIBS TestElBashiqServer TestUtils Utils ElBashiqServer ElBashiqClient)
+SET (EXTRA_LIBS TestElBashiqServer TestUtils ElBashiqServer ElBashiqClient Utils)
 ADD_EXECUTABLE(${PROJECT_NAME} main.c)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${EXTRA_LIBS})
 
