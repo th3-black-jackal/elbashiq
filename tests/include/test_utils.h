@@ -1,10 +1,11 @@
 #ifndef test_utils
 #define test_utils
 
-
+#include "stdlib.h"
 #include "utils.h"
 
-void testFillServInfo();
+
+void testFillServInfoLocalDevice();
 void testGetSocketDescriptorLocalDevice();
 
 #endif

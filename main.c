@@ -1,6 +1,6 @@
 #include "test_el_bashiq_server.h"
 #include "test_utils.h"
-
+#include "el_bashiq_client.h"
 void runTests(){
 	/*testSearchList();
 	testGetSocketDescriptorLocalDevice();
@@ -8,12 +8,14 @@ void runTests(){
 	testStartListeningLocalDevice();
 	testStartServerLocalDevice();*/
 	//testConnectToServer();
-	testFillServInfo();
+	//testFillServInfoLocalDevice(); 
+	//testGetSocketDescriptorLocalDevice();
 }
 
 
 int main(){
-	runTests();
+	//runTests();
+	connectToServer("127.0.0.1");
 	return 0;
 }
 

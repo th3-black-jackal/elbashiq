@@ -1,5 +1,5 @@
-#ifndef el_bashiq_client
-#define el_bashiq_client
+#ifndef utils
+#define utils
 
 #include "stdlib.h"
 #include "stdio.h"
@@ -9,6 +9,10 @@
 #include "netinet/in.h"
 #include "string.h"
 #include "errno.h"
+
+
+
+#define PORT "1996"
 
 
 struct addrinfo *fillServInfo(char *user_addr);
