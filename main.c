@@ -5,9 +5,13 @@
 
 
 int main(int argc, char **argv){
+	if(argc < 2){
+		fprintf(stderr, "Usage: %s <server_ip>\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	const char *user_addr = argv[1];
 	SearchContext ctx;
 	initSearchContext(&ctx);
-	const char *user_addr = "0.0.0.0";
 	if(searchList(&ctx, user_addr) == 0){
 		printResolvedAddress(&ctx);
 		if(connectToResolvedAddress(&ctx) == 0){
