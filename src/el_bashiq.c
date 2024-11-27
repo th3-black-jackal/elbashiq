@@ -3,17 +3,6 @@
 
 
 
-char ipstr[INET6_ADDRSTRLEN];
-char s[INET6_ADDRSTRLEN];
-char msg[MAXDATASIZE];
-
-//File properties
-struct addrinfo hints;
-struct addrinfo *servinfo;
-int statue;
-int *socket_desc, *new_fd;
-int desc, new_desc;
-
 
 
 void initSearchContext(SearchContext *ctx){
@@ -26,7 +15,7 @@ void initSearchContext(SearchContext *ctx){
 	ctx->hints.ai_flags = AI_PASSIVE;
 }
 
-void searchList(SearchContext *ctx, const char *user_addr){
+int searchList(SearchContext *ctx, const char *user_addr){
 	if(!ctx || !user_addr){
 		fprintf(stderr, "Invalid context or input address.\n");
 		return -1;
@@ -49,6 +38,33 @@ void searchList(SearchContext *ctx, const char *user_addr){
 	return 0;
 }
 
+
+int connectToResolvedAddress(SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		fprintf(stderr, "Invalid context or address information.\n");
+		return -1;
+	}
+	ctx->socket_desc = socket(ctx->servinfo->ai_family, ctx->servinfo->ai_socktype, ctx->servinfo->ai_protocol);
+	if(ctx->socket_desc == -1){
+		perror("Socket creation failed");
+		return -1;
+	}
+	if(connect(ctx->socket_desc, ctx->servinfo->ai_addr, ctx->servinfo->ai_addrlen) == -1){
+		perror("Connection failed");
+		return -1;
+	}
+	printf("Connected to %s\n", ctx->ipstr);
+	return 0;
+}
+
+
+void printResolvedAddress(const SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		printf("No address information available\n");
+		return;
+	}
+	printf("Resolved Address:%s\n", ctx->ipstr);
+}
 
 /*
 void bindSocket(){

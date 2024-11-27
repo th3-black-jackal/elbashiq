@@ -17,18 +17,20 @@
 
 
 typedef struct {
-	extern struct addrinfo hints;
-	extern struct addrinfo *servinfo;
-	extern int status;
-	extern int socket_desc, new_fd;
-	extern int desc, new_desc;
-	extern char ipstr[INET6_ADDRSTRLEN];
-	extern char s[INET6_ADDRSTRLEN];
-	extern char msg[MAXDATASIZE];
-}SearchContent;
+	struct addrinfo hints;
+	struct addrinfo *servinfo;
+	int status;
+	int socket_desc, new_fd;
+	int desc, new_desc;
+	char ipstr[INET6_ADDRSTRLEN];
+	char s[INET6_ADDRSTRLEN];
+	char msg[MAXDATASIZE];
+}SearchContext;
 
 void initSearchContext(SearchContext *ctx);
-void searchList(char*);
+int searchList(SearchContext *ctx, const char *user_data);
+void printResolvedAddress(const SearchContext *ctx);
+int connectToResolvedAddress(SearchContext *ctx);
 void bindSocket();
 void startServer();
 void sendMsg(char *, int);
