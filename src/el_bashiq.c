@@ -1,27 +1,56 @@
-#include "stdlib.h"
-#include "stdio.h"
-#include "sys/types.h"
-#include "sys/socket.h"
-#include "netdb.h"
-#include "netinet/in.h"
-#include "string.h"
-#include "errno.h"
 #include "el_bashiq.h"
 
-void searchList(char *user_addr){
-	socket_desc = &desc;
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-	void *addr;
-	char *ipver;	
-	if((statue = getaddrinfo(user_addr, PORT, &hints, &servinfo)) != 0){
-		printf("Error in getting IP %d\n%s", statue, gai_strerror(statue));
-	}
-	new_fd = &new_desc;	
+
+
+
+char ipstr[INET6_ADDRSTRLEN];
+char s[INET6_ADDRSTRLEN];
+char msg[MAXDATASIZE];
+
+//File properties
+struct addrinfo hints;
+struct addrinfo *servinfo;
+int statue;
+int *socket_desc, *new_fd;
+int desc, new_desc;
+
+
+
+void initSearchContext(SearchContext *ctx){
+	memset(ctx, 0, sizeof(SearchContext));
+	ctx->socket_desc = -1;
+	ctx->new_fd = -1;
+	memset(&ctx->hints, 0, sizeof(ctx->hints));
+	ctx->hints.ai_family = AF_UNSPEC;
+	ctx->hints.ai_socktype = SOCK_STREAM;
+	ctx->hints.ai_flags = AI_PASSIVE;
 }
 
+void searchList(SearchContext *ctx, const char *user_addr){
+	if(!ctx || !user_addr){
+		fprintf(stderr, "Invalid context or input address.\n");
+		return -1;
+	}
+	ctx->status = getaddrinfo(user_addr, PORT, &ctx->hints, &ctx->servinfo);
+	if(ctx->status != 0){
+		fprintf(stderr, "Error in getaddrinfo: %s\n", gai_strerror(ctx->status));
+		return -1;
+	}
+	void *addr;
+	if(ctx->servinfo->ai_family == AF_INET){
+		struct sockaddr_in *ipv4 = (struct sockaddr_in *)ctx->servinfo->ai_addr;
+		addr = &(ipv4->sin_addr);
+	} else {
+		struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)ctx->servinfo->ai_addr;
+		addr = &(ipv6->sin6_addr);
+	}
+	inet_ntop(ctx->servinfo->ai_family, addr, ctx->ipstr, sizeof(ctx->ipstr));
+	printf("Resolved IP address: %s\n", ctx->ipstr);
+	return 0;
+}
+
+
+/*
 void bindSocket(){
 	int yes = 1;
 	printf("Binding\n");
@@ -62,7 +91,6 @@ void startServer(){
 		perror("accept");
 		exit(1);
 	}
-
 		
 }
 
@@ -89,27 +117,27 @@ void sendMsg(char *msg, int fd){
 
 void recvMsg(int fd){
 	int numbytes;
-	printf("%d\n", fd);
+	//printf("%d\n", fd);
 	if((numbytes = read(fd, msg, MAXDATASIZE - 1)) == -1){
 		perror("recv");
 		exit(1);
 	}
 	msg[numbytes] = '\0';
-	printf("recieved %s\n", msg);
+	//printf("recieved %s\n", msg);
 }
 
-/* Sending file function:
- * It takes 3 paramters which is the file_size, file_name, and the socket_descriptor
- */
+ Sending file function:
+ It takes 3 paramters which is the file_size, file_name, and the socket_descriptor
+/
 void sendFile(unsigned int file_size, const char *file_name, int fd){
-	/* First send file's name
-	 * Convert file_size to Network Byte Order
-	 * Second send file's size
-	 */
+	 First send file's name
+	 Convert file_size to Network Byte Order
+	 Second send file's size
+	 
 	uint32_t network_byte_order = htonl(file_size);
 	//Send file name
 	int sent_bytes;
-	printf("File name length: %d\n", strlen(file_name));
+	printf("File name length: %lu\n", strlen(file_name));
 	if((sent_bytes = write(fd, file_name, strlen(file_name))) == -1){
 		perror("send");
 		exit(1);
@@ -151,3 +179,4 @@ void recvFile(int fd){
 	file_size = ntohl(network_byte_order);
 	printf("file size: %s\n", buffer);
 }	
+*/
