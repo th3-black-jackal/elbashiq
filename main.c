@@ -23,12 +23,20 @@ int main(int argc, char **argv){
 	} else {
 		printf("Failed to resolve address.\n");
 	}
-
-	if(ctx.servinfo){
+	if(bindSocket(&ctx) != 0){
+		fprintf(stderr, "Failed to bind socket\n");
 		freeaddrinfo(ctx.servinfo);
+		return 1;
 	}
-	if(ctx.socket_desc != -1){
+	printf("Server setup successfully.\n");
+	if(startServer(&ctx) != 0){
+		fprintf(stderr, "Failed to accept connections\n");
+		freeaddrinfo(ctx.servinfo);
 		close(ctx.socket_desc);
+		return 1;
 	}
+	printf("Server is running and connection accepted.\n");
+	freeaddrinfo(ctx.servinfo);
+	close(ctx.socket_desc);
 	return 0;
 }

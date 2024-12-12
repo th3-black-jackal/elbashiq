@@ -1,10 +1,5 @@
 #include "el_bashiq.h"
 
-
-
-
-
-
 void initSearchContext(SearchContext *ctx){
 	memset(ctx, 0, sizeof(SearchContext));
 	ctx->socket_desc = -1;
@@ -66,51 +61,62 @@ void printResolvedAddress(const SearchContext *ctx){
 	printf("Resolved Address:%s\n", ctx->ipstr);
 }
 
-/*
-void bindSocket(){
+
+int bindSocket(SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		fprintf(stderr, "Invalid context or address information.\n");
+		return -1;
+	}
 	int yes = 1;
 	printf("Binding\n");
-	if(servinfo == NULL)
-		printf("Something wrong\n");
-	printf("Creating socket\n");
-	if((*socket_desc = socket(servinfo -> ai_family, servinfo -> ai_socktype, servinfo -> ai_protocol)) == 
-				-1 ){	
-		perror("Can't creat socket\n");
-		exit(1);
-	}	
-	else{
-		if(setsockopt(*socket_desc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
-		       perror("setsockopt");	
-		       exit(1);
-		}else {
-			printf("socket_desc: %d\n", *socket_desc);
-			if((bind(*socket_desc, servinfo -> ai_addr, servinfo -> ai_addrlen)) == -1){
-				perror("bind");
-			}else{
-			printf("%d\n", *socket_desc);
-			printf("Connected to %s\n", ipstr);
-			printf("%d\n", *socket_desc);
-				}
-			}
-		}	
-		if((listen(*socket_desc, BACKLOG)) == -1){
-				fprintf(stderr, "Can't listening\n");
-		} 
+	ctx->socket_desc = socket(ctx->servinfo->ai_family, ctx->servinfo->ai_socktype, ctx->servinfo->ai_protocol);
+	if(ctx->socket_desc == -1){
+		perror("Can't create socket");
+		return -1;
+	}
+		
+	if(setsockopt(ctx->socket_desc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
+		perror("setsockopt faield");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	
+	if((bind(ctx->socket_desc, ctx->servinfo->ai_addr, ctx->servinfo->ai_addrlen)) == -1){
+		perror("Bind failed");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	printf("Socket successfully bound. Descriptor: %d\n", ctx->socket_desc);
+	if(listen(ctx->socket_desc, BACKLOG) == -1){
+		fprintf(stderr, "Error starting to listen.\n");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	printf("Listening on socket %d\n", ctx->socket_desc);
+	return 0;
 }
 
-void startServer(){	
+
+int startServer(SearchContext *ctx){
+	if(!ctx){
+		fprintf(stderr, "Invalid context.\n");
+		return -1;
+	}
 	printf("Start server...\n");	
 	struct sockaddr_storage their_addr;
 	socklen_t sin_size = sizeof their_addr;
-	printf("origional socket descriptor: %d\n", *socket_desc);
-	if((*new_fd = accept(*socket_desc, (struct sockaddr *)&their_addr, &sin_size)) == -1){
-		perror("accept");
-		exit(1);
+	printf("Origional socket descriptor: %d\n", ctx->socket_desc);
+	int new_fd = accept(ctx->socket_desc, (struct sockaddr *)&their_addr, &sin_size);
+	if(new_fd == -1){
+		perror("Accept failed");
+		return -1;
 	}
-		
+	printf("Accepted connection. New socket descriptor: %d\n", new_fd);
+	ctx->socket_desc = new_fd;
+	return 0;	
 }
 
-
+/*
 void connectToServer(){
 	*socket_desc = socket(servinfo -> ai_family, servinfo -> ai_socktype,0);
 	printf("Socket created\n");
