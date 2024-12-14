@@ -9,23 +9,34 @@ ClientHandler::~ClientHandler(){
 }
 
 void ClientHandler::handle(){
-	std::string client_ip = getClient();
+	std::string client_ip = getClientIP();
 	std::cout<<"Connected to client: "<< client_ip <<"\n";
 	char buffer[1024];
 	ssize_t bytes_read;
 	while((bytes_read = recv(client_fd, buffer, sizeof(buffer), 0)) > 0){
+		buffer[bytes_read] = '\0';
+		std::string message(buffer);
+		if(message == "quit\n" || message == "quit\r\n"){
+			std::cout <<"Client "<<client_ip << "sent 'quit'. Closing connection"<<"\n";
+			break;
+		}
 		std::cout <<"Received from "<<client_ip<<": "<<std::string(buffer, bytes_read)<<"\n";
-		send(cliend_fd, buffer, bytes_read, 0);
+		if(send(client_fd, buffer, bytes_read, 0) ==  -1){
+			perror("couldn't echo back to client");
+			break;
+		}
 	}
 	if(bytes_read == 0){
 		std::cout <<"Client disconnected: "<< client_ip <<"\n";
 	} else if (bytes_read < 0){
 		perror("Error in receving bytes");
 	}
+	close(client_fd);
+	client_fd = -1;
 }
 
 std::string ClientHandler::getClientIP() const{
-	char ipstr[INET6_ADDSTRLEN];
+	char ipstr[INET6_ADDRSTRLEN];
 	if(client_addr.ss_family == AF_INET){
 		struct sockaddr_in *ipv4 = (struct sockaddr_in *)&client_addr;
 		inet_ntop(AF_INET, &(ipv4->sin_addr), ipstr, sizeof(ipstr));
@@ -72,7 +83,7 @@ void Server::bindSocket(){
 		throw std::runtime_error("Failed to create socket");
 	}
 	int yes = 1;
-	if(setsockopt(server_fd, SOL_SOCKET, SOUSEADDR, &yes, sizeof(yes)) == -1){
+	if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1){
 		perror("setsockopt");
 		freeaddrinfo(res);
 		close(server_fd);
