@@ -1,3 +1,6 @@
+![Cover Image](./FirstVersionOfTheCover.webp)
+
+
 ElBashiq is a wrapper for C sockets, it's used for simple message transfering and handles network search and destination selection, it's not complete yet,
 but I have tested it to transfer data between Mobile phone, Laptop and Raspberry PI, the main intention was to transfer commands to RapsberryPI.
 

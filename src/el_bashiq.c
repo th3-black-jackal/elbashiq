@@ -1,72 +1,122 @@
-#include "stdlib.h"
-#include "stdio.h"
-#include "sys/types.h"
-#include "sys/socket.h"
-#include "netdb.h"
-#include "netinet/in.h"
-#include "string.h"
-#include "errno.h"
 #include "el_bashiq.h"
 
-void searchList(char *user_addr){
-	socket_desc = &desc;
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-	void *addr;
-	char *ipver;	
-	if((statue = getaddrinfo(user_addr, PORT, &hints, &servinfo)) != 0){
-		printf("Error in getting IP %d\n%s", statue, gai_strerror(statue));
-	}
-	new_fd = &new_desc;	
+void initSearchContext(SearchContext *ctx){
+	memset(ctx, 0, sizeof(SearchContext));
+	ctx->socket_desc = -1;
+	ctx->new_fd = -1;
+	memset(&ctx->hints, 0, sizeof(ctx->hints));
+	ctx->hints.ai_family = AF_UNSPEC;
+	ctx->hints.ai_socktype = SOCK_STREAM;
+	ctx->hints.ai_flags = AI_PASSIVE;
 }
 
-void bindSocket(){
+int searchList(SearchContext *ctx, const char *user_addr){
+	if(!ctx || !user_addr){
+		fprintf(stderr, "Invalid context or input address.\n");
+		return -1;
+	}
+	ctx->status = getaddrinfo(user_addr, PORT, &ctx->hints, &ctx->servinfo);
+	if(ctx->status != 0){
+		fprintf(stderr, "Error in getaddrinfo: %s\n", gai_strerror(ctx->status));
+		return -1;
+	}
+	void *addr;
+	if(ctx->servinfo->ai_family == AF_INET){
+		struct sockaddr_in *ipv4 = (struct sockaddr_in *)ctx->servinfo->ai_addr;
+		addr = &(ipv4->sin_addr);
+	} else {
+		struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)ctx->servinfo->ai_addr;
+		addr = &(ipv6->sin6_addr);
+	}
+	inet_ntop(ctx->servinfo->ai_family, addr, ctx->ipstr, sizeof(ctx->ipstr));
+	printf("Resolved IP address: %s\n", ctx->ipstr);
+	return 0;
+}
+
+
+int connectToResolvedAddress(SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		fprintf(stderr, "Invalid context or address information.\n");
+		return -1;
+	}
+	ctx->socket_desc = socket(ctx->servinfo->ai_family, ctx->servinfo->ai_socktype, ctx->servinfo->ai_protocol);
+	if(ctx->socket_desc == -1){
+		perror("Socket creation failed");
+		return -1;
+	}
+	if(connect(ctx->socket_desc, ctx->servinfo->ai_addr, ctx->servinfo->ai_addrlen) == -1){
+		perror("Connection failed");
+		return -1;
+	}
+	printf("Connected to %s\n", ctx->ipstr);
+	return 0;
+}
+
+
+void printResolvedAddress(const SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		printf("No address information available\n");
+		return;
+	}
+	printf("Resolved Address:%s\n", ctx->ipstr);
+}
+
+
+int bindSocket(SearchContext *ctx){
+	if(!ctx || !ctx->servinfo){
+		fprintf(stderr, "Invalid context or address information.\n");
+		return -1;
+	}
 	int yes = 1;
 	printf("Binding\n");
-	if(servinfo == NULL)
-		printf("Something wrong\n");
-	printf("Creating socket\n");
-	if((*socket_desc = socket(servinfo -> ai_family, servinfo -> ai_socktype, servinfo -> ai_protocol)) == 
-				-1 ){	
-		perror("Can't creat socket\n");
-		exit(1);
-	}	
-	else{
-		if(setsockopt(*socket_desc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
-		       perror("setsockopt");	
-		       exit(1);
-		}else {
-			printf("socket_desc: %d\n", *socket_desc);
-			if((bind(*socket_desc, servinfo -> ai_addr, servinfo -> ai_addrlen)) == -1){
-				perror("bind");
-			}else{
-			printf("%d\n", *socket_desc);
-			printf("Connected to %s\n", ipstr);
-			printf("%d\n", *socket_desc);
-				}
-			}
-		}	
-		if((listen(*socket_desc, BACKLOG)) == -1){
-				fprintf(stderr, "Can't listening\n");
-		} 
+	ctx->socket_desc = socket(ctx->servinfo->ai_family, ctx->servinfo->ai_socktype, ctx->servinfo->ai_protocol);
+	if(ctx->socket_desc == -1){
+		perror("Can't create socket");
+		return -1;
+	}
+		
+	if(setsockopt(ctx->socket_desc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1){
+		perror("setsockopt faield");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	
+	if((bind(ctx->socket_desc, ctx->servinfo->ai_addr, ctx->servinfo->ai_addrlen)) == -1){
+		perror("Bind failed");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	printf("Socket successfully bound. Descriptor: %d\n", ctx->socket_desc);
+	if(listen(ctx->socket_desc, BACKLOG) == -1){
+		fprintf(stderr, "Error starting to listen.\n");
+		close(ctx->socket_desc);
+		return -1;
+	}
+	printf("Listening on socket %d\n", ctx->socket_desc);
+	return 0;
 }
 
-void startServer(){	
+
+int startServer(SearchContext *ctx){
+	if(!ctx){
+		fprintf(stderr, "Invalid context.\n");
+		return -1;
+	}
 	printf("Start server...\n");	
 	struct sockaddr_storage their_addr;
 	socklen_t sin_size = sizeof their_addr;
-	printf("origional socket descriptor: %d\n", *socket_desc);
-	if((*new_fd = accept(*socket_desc, (struct sockaddr *)&their_addr, &sin_size)) == -1){
-		perror("accept");
-		exit(1);
+	printf("Origional socket descriptor: %d\n", ctx->socket_desc);
+	int new_fd = accept(ctx->socket_desc, (struct sockaddr *)&their_addr, &sin_size);
+	if(new_fd == -1){
+		perror("Accept failed");
+		return -1;
 	}
-
-		
+	printf("Accepted connection. New socket descriptor: %d\n", new_fd);
+	ctx->socket_desc = new_fd;
+	return 0;	
 }
 
-
+/*
 void connectToServer(){
 	*socket_desc = socket(servinfo -> ai_family, servinfo -> ai_socktype,0);
 	printf("Socket created\n");
@@ -89,27 +139,27 @@ void sendMsg(char *msg, int fd){
 
 void recvMsg(int fd){
 	int numbytes;
-	printf("%d\n", fd);
+	//printf("%d\n", fd);
 	if((numbytes = read(fd, msg, MAXDATASIZE - 1)) == -1){
 		perror("recv");
 		exit(1);
 	}
 	msg[numbytes] = '\0';
-	printf("recieved %s\n", msg);
+	//printf("recieved %s\n", msg);
 }
 
-/* Sending file function:
- * It takes 3 paramters which is the file_size, file_name, and the socket_descriptor
- */
+ Sending file function:
+ It takes 3 paramters which is the file_size, file_name, and the socket_descriptor
+/
 void sendFile(unsigned int file_size, const char *file_name, int fd){
-	/* First send file's name
-	 * Convert file_size to Network Byte Order
-	 * Second send file's size
-	 */
+	 First send file's name
+	 Convert file_size to Network Byte Order
+	 Second send file's size
+	 
 	uint32_t network_byte_order = htonl(file_size);
 	//Send file name
 	int sent_bytes;
-	printf("File name length: %d\n", strlen(file_name));
+	printf("File name length: %lu\n", strlen(file_name));
 	if((sent_bytes = write(fd, file_name, strlen(file_name))) == -1){
 		perror("send");
 		exit(1);
@@ -151,3 +201,4 @@ void recvFile(int fd){
 	file_size = ntohl(network_byte_order);
 	printf("file size: %s\n", buffer);
 }	
+*/
