@@ -102,19 +102,39 @@ int startServer(SearchContext *ctx){
 		fprintf(stderr, "Invalid context.\n");
 		return -1;
 	}
-	printf("Start server...\n");	
-	struct sockaddr_storage their_addr;
-	socklen_t sin_size = sizeof their_addr;
-	printf("Origional socket descriptor: %d\n", ctx->socket_desc);
-	int new_fd = accept(ctx->socket_desc, (struct sockaddr *)&their_addr, &sin_size);
-	if(new_fd == -1){
-		perror("Accept failed");
-		return -1;
+	printf("Starting server...\n");	
+	printf("Server is ready to accept connections...\n");
+	while(1){
+		struct sockaddr_storage client_addr;
+		socklen_t addr_len = sizeof(client_addr);
+		printf("Origional socket descriptor: %d\n", ctx->socket_desc);
+		int client_fd = accept(ctx->socket_desc, (struct sockaddr *)&client_addr, &addr_len);
+		if(client_fd == -1){
+			perror("Accept failed");
+			continue;
+		}
+		ClientConnection *conn = malloc(sizeof(ClientConnection));
+		if(!conn) {
+			perror("malloc");
+			close(client_id);
+			continue;
+		}
+		conn->client_id = client_id;
+		memcpy(&conn->addr, &client_addr, sizeof(client_addr));
+		pthread_t client_thread;
+		if(pthread_create(&client_thread, NULL, handlClient, conn) != 0;){
+			perror("pthread_create");
+			close(client_fd);
+			free(conn);
+			continue;
+		}
+		printf("Accepted connection. New socket descriptor: %d\n", new_fd);
+		ctx->socket_desc = new_fd;
 	}
-	printf("Accepted connection. New socket descriptor: %d\n", new_fd);
-	ctx->socket_desc = new_fd;
-	return 0;	
+	
+		return 0;	
 }
+
 
 /*
 void connectToServer(){

@@ -1,6 +1,13 @@
-#ifndef C_SOCKETS_NASSER
-#define C_SOCKETS_NASSER
+#ifndef ELBASHIQSERVER_H
+#define ELBASHIQSERVER_H
 
+#include <iostream>
+#include <string>
+#include <memory>
+#include <thread>
+#include <vector>
+#include <arpa/inet.h>
+#include <cstring>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +41,31 @@ typedef struct {
 }ClientConnection;
 
 
+class ClientHandler{
+	public:
+	       	ClientHandler(int client_fd, struct sockaddr_storage client_addr);
+		~ClientHandler();
+		void handle();
+	private:
+		int client_fd;
+		struct sockaddr_storage client_addr;
+		std::string getClientIP() const;
+};
+
+class Server {
+	public:
+		Server(const std::string &port);
+		~Server();
+		void start();
+	private:
+		std::string port;
+		int server_fd;
+		std::vector<std::thread> threads;
+		void bindSocket();
+		void acceptConnections();
+};
+#endif
+/*
 void initSearchContext(SearchContext *ctx);
 int searchList(SearchContext *ctx, const char *user_data);
 void printResolvedAddress(const SearchContext *ctx);
@@ -46,5 +78,4 @@ void recvMsg(int);
 void recvFile(int);
 void connectToServer();
 
-#endif
-
+*/
