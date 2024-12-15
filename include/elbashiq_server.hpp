@@ -17,12 +17,14 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <errno.h>
+#include <fstream>
+
 
 #define BACKLOG 10
 #define PORT "1996"
 #define MAXDATASIZE 100
 
-
+/*
 typedef struct {
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
@@ -39,17 +41,20 @@ typedef struct {
 	int client_fd;
 	struct sockaddr_storage addr;
 }ClientConnection;
-
+*/
 
 class ClientHandler{
 	public:
 	       	ClientHandler(int client_fd, struct sockaddr_storage client_addr);
 		~ClientHandler();
 		void handle();
+
 	private:
 		int client_fd;
 		struct sockaddr_storage client_addr;
 		std::string getClientIP() const;
+		void receiveFile();
+		void receiveMessage();
 };
 
 class Server {

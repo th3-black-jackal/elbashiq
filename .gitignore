@@ -2,4 +2,5 @@ build/*
 build
 *.swp
 *.out
+*.o
 main

@@ -13,14 +13,19 @@ void ClientHandler::handle(){
 	std::cout<<"Connected to client: "<< client_ip <<"\n";
 	char buffer[1024];
 	ssize_t bytes_read;
-	while((bytes_read = recv(client_fd, buffer, sizeof(buffer), 0)) > 0){
+	while((bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0)) > 0){
 		buffer[bytes_read] = '\0';
-		std::string message(buffer);
-		if(message == "quit\n" || message == "quit\r\n"){
+		std::string command(buffer);
+		if(command == "quit\n" || command == "quit\r\n"){
 			std::cout <<"Client "<<client_ip << "sent 'quit'. Closing connection"<<"\n";
 			break;
 		}
-		std::cout <<"Received from "<<client_ip<<": "<<std::string(buffer, bytes_read)<<"\n";
+		else if(command == "recv_file\n" || command == "recv_file\n\r"){
+			receiveFile();
+		} else {
+			receiveMessage();
+		}
+		
 		if(send(client_fd, buffer, bytes_read, 0) ==  -1){
 			perror("couldn't echo back to client");
 			break;
@@ -33,6 +38,51 @@ void ClientHandler::handle(){
 	}
 	close(client_fd);
 	client_fd = -1;
+}
+
+void ClientHandler::receiveFile(){
+	char buffer[1024];
+	ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+	if(bytes_read <= 0){
+		perror("Error receving file name");
+		return;
+	}
+	buffer[bytes_read] = '\0';
+	std::string fileName(buffer);
+	std::cout<<"Receiving file: "<< fileName <<"\n";
+	uint64_t fileSize;
+	bytes_read = recv(client_fd, &fileSize, sizeof(fileSize), 0);
+	if(bytes_read < 0){
+		perror("Error receiving file size");
+		return;
+	}
+	std::cout<<"File size: "<<fileSize<<"bytes\n";
+	std::ofstream outFile(fileName, std::ios::binary);
+	uint64_t bytes_received = 0;
+	while(bytes_received < fileSize) {
+		bytes_read = recv(client_fd, buffer, std::min(sizeof(buffer), fileSize - bytes_received), 0);
+		if(bytes_read <= 0){
+			perror("Error receiving file data");
+			break;
+		}
+		outFile.write(buffer, bytes_read);
+		bytes_received += bytes_read;
+	}
+	if(bytes_received == fileSize){
+		std::cout<<"File received successfully: "<< fileName <<"\n";
+	} else {
+		std::cerr << "File transfer incomplete.\n";
+	}
+	outFile.close();
+}
+
+void ClientHandler::receiveMessage(){
+	char buffer[1024];
+	ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+	if(bytes_read > 0){
+		buffer[bytes_read] = '\0';
+		std::cout<<"Message from client: "<<buffer;
+	}
 }
 
 std::string ClientHandler::getClientIP() const{
@@ -122,3 +172,6 @@ void Server::acceptConnections(){
 				});
 	}
 }
+
+
+
